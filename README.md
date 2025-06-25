@@ -1,37 +1,184 @@
-Contratus AI - Sistema de Consulta Semântica de ContratosVisão Geral do ProjetoO Contratus AI é um sistema moderno para processamento e consulta inteligente de contratos imobiliários. Ele utiliza o poder dos Large Language Models (LLMs) e bancos de dados vetoriais para permitir busca semântica e responder a perguntas em linguagem natural diretamente do conteúdo de seus documentos.Problema Resolvido: Em um cenário com múltiplos contratos complexos, encontrar informações específicas (como valores de aluguel, prazos de rescisão, nomes de partes) pode ser demorado e propenso a erros. O Contratus AI automatiza e agiliza essa busca, transformando seus contratos em uma base de conhecimento interativa.Conceitos FundamentaisEste projeto implementa a arquitetura de Geração Aumentada por Recuperação (RAG - Retrieval-Augmented Generation):Geração Aumentada por Recuperação (RAG): É uma técnica que capacita um LLM a acessar e utilizar informações de uma base de conhecimento externa (neste caso, seus contratos PDF) para gerar respostas mais precisas, atualizadas e com citação de fontes, indo além do seu conhecimento de treinamento.Embeddings: São representações numéricas (vetores) de textos. Textos com significados semelhantes são transformados em vetores "próximos" em um espaço multidimensional. O modelo utilizado para gerar esses embeddings é o Google Gemini (models/embedding-001), com dimensão 768.Banco de Dados Vetorial (Pinecone): Uma base de dados otimizada para armazenar e realizar buscas de similaridade em alta velocidade entre vetores de embeddings. Ele armazena os embeddings dos seus contratos, permitindo que o sistema encontre rapidamente os trechos mais relevantes para uma consulta. A métrica de similaridade utilizada é a Cosseno.Large Language Model (LLM): O "cérebro" do sistema que compreende as perguntas e formula as respostas. Após o sistema de busca (RAG) encontrar os trechos relevantes dos contratos, eles são passados para o LLM, que utiliza essas informações para gerar uma resposta contextualizada. O modelo de LLM utilizado é o Google Gemini (models/gemini-1.5-flash).Tecnologias UtilizadasBackend: Python, FastAPI, Uvicorn, Pinecone (cliente Python), google-generativeai (para Gemini), langchain-community (para processamento de PDFs), python-dotenv.Frontend: SvelteKit, Tailwind CSS, DaisyUI.Estrutura do Projeto├── .env                  # Variáveis de ambiente (chaves API, etc.)
+# Contratus AI - Sistema de Consulta Semântica de Contratos
+
+## 🔍 Visão Geral do Projeto
+
+O **Contratus AI** é um sistema moderno para processamento e consulta inteligente de contratos imobiliários. Ele utiliza o poder dos Large Language Models (LLMs) e bancos de dados vetoriais para permitir busca semântica e responder a perguntas em linguagem natural diretamente do conteúdo de seus documentos.
+
+### 🎯 Problema Resolvido
+
+Em um cenário com múltiplos contratos complexos, encontrar informações específicas (como valores de aluguel, prazos de rescisão, nomes de partes) pode ser demorado e propenso a erros. O Contratus AI automatiza e agiliza essa busca, transformando seus contratos em uma base de conhecimento interativa.
+
+## 🧠 Conceitos Fundamentais
+
+Este projeto implementa a arquitetura de **Geração Aumentada por Recuperação (RAG - Retrieval-Augmented Generation)**:
+
+### RAG (Retrieval-Augmented Generation)
+É uma técnica que capacita um LLM a acessar e utilizar informações de uma base de conhecimento externa (neste caso, seus contratos PDF) para gerar respostas mais precisas, atualizadas e com citação de fontes, indo além do seu conhecimento de treinamento.
+
+### Embeddings
+São representações numéricas (vetores) de textos. Textos com significados semelhantes são transformados em vetores "próximos" em um espaço multidimensional. O modelo utilizado é o **Google Gemini (models/embedding-001)**, com dimensão 768.
+
+### Banco de Dados Vetorial (Pinecone)
+Uma base de dados otimizada para armazenar e realizar buscas de similaridade em alta velocidade entre vetores de embeddings. A métrica de similaridade utilizada é a **Cosseno**.
+
+### Large Language Model (LLM)
+O "cérebro" do sistema que compreende as perguntas e formula as respostas. O modelo utilizado é o **Google Gemini (models/gemini-1.5-flash)**.
+
+## 🛠️ Tecnologias Utilizadas
+
+### Backend
+- **Python** com **FastAPI** e **Uvicorn**
+- **Pinecone** (cliente Python)
+- **google-generativeai** (para Gemini)
+- **langchain-community** (para processamento de PDFs)
+- **python-dotenv**
+
+### Frontend
+- **SvelteKit**
+- **Tailwind CSS**
+- **DaisyUI**
+
+## 📁 Estrutura do Projeto
+
+```
+├── .env                  # Variáveis de ambiente (chaves API, etc.)
 ├── api_pinecone.py       # API principal com FastAPI (busca semântica, LLM)
 ├── api_upload.py         # API para upload de contratos
 ├── llm_router.py         # Roteador para perguntas ao LLM
-├── pinecone_utils.py     # Utilitários para interação com o Pinecone e geração de embeddings
-├── processar_contrato.py # Script para processamento de PDFs e indexação no Pinecone
+├── pinecone_utils.py     # Utilitários para interação com o Pinecone
+├── processar_contrato.py # Script para processamento de PDFs
 ├── README.md             # Este arquivo
 ├── requirements.txt      # Dependências Python
 ├── shared.py             # Funções e modelos compartilhados
 ├── contratos/            # Diretório para armazenar os contratos PDF
 └── frontend/             # Aplicação SvelteKit (interface do usuário)
-Como Rodar o ProjetoSiga este passo a passo para configurar e iniciar o Contratus AI em sua máquina.Pré-requisitosCertifique-se de ter os seguintes softwares instalados em seu sistema:Git: Para clonar o repositório.Baixar GitPython 3.11.9: Versão recomendada para compatibilidade com as bibliotecas.Baixar Python 3.11.9 (Windows installer)IMPORTANTE: Durante a instalação do Python, marque a opção "Add Python 3.11 to PATH".Node.js LTS e npm: Para rodar o frontend.Baixar Node.js LTSIMPORTANTE: Durante a instalação do Node.js, certifique-se de que a opção "Add to PATH" esteja selecionada.Se usar PowerShell, pode ser necessário ajustar a política de execução: Abra o PowerShell como Administrador e execute Set-ExecutionPolicy RemoteSigned (confirme com Y).Configuração do ProjetoClonar o Repositório:Abra seu terminal (PowerShell ou Prompt de Comando) e navegue até a pasta onde deseja salvar o projeto.Clone o repositório (substitua <URL_DO_SEU_REPOSITORIO> pela URL do seu repositório no GitHub):git clone <URL_DO_SEU_REPOSITORIO>
-cd Contratus-AI-RAG # Ou o nome da pasta do seu projeto
-Configurar Variáveis de Ambiente (.env):Na pasta raiz do projeto (Contratus-AI-RAG/), crie um arquivo chamado .env.Este arquivo conterá suas chaves de API sensíveis e NUNCA deve ser enviado para o GitHub.Copie e cole o seguinte conteúdo no seu arquivo .env, substituindo os placeholders SEU_VALOR_DA_PINECONE_API_KEY_AQUI, SEU_VALOR_DO_PINECONE_HOST_AQUI, e SUA_CHAVE_DO_GEMINI_AQUI pelos seus dados reais.# Configurações do Pinecone
+```
+
+## 🚀 Como Rodar o Projeto
+
+### Pré-requisitos
+
+Certifique-se de ter os seguintes softwares instalados:
+
+- **Git**: Para clonar o repositório → [Baixar Git](https://git-scm.com/)
+- **Python 3.11.9**: Versão recomendada → [Baixar Python](https://www.python.org/downloads/)
+  - ⚠️ **IMPORTANTE**: Durante a instalação, marque "Add Python 3.11 to PATH"
+- **Node.js LTS e npm**: Para o frontend → [Baixar Node.js](https://nodejs.org/)
+  - ⚠️ **IMPORTANTE**: Certifique-se de que "Add to PATH" esteja selecionado
+
+> **Nota para Windows/PowerShell**: Pode ser necessário ajustar a política de execução:
+> ```powershell
+> Set-ExecutionPolicy RemoteSigned
+> ```
+
+### 1. Configuração do Projeto
+
+#### Clonar o Repositório
+```bash
+git clone <URL_DO_SEU_REPOSITORIO>
+cd Contratus-AI-RAG
+```
+
+#### Configurar Variáveis de Ambiente
+Crie um arquivo `.env` na pasta raiz com o seguinte conteúdo:
+
+```env
+# Configurações do Pinecone
 PINECONE_API_KEY=SEU_VALOR_DA_PINECONE_API_KEY_AQUI
 PINECONE_HOST=SEU_VALOR_DO_PINECONE_HOST_AQUI
-PINECONE_INDEX_NAME=brito-ai # Ou o nome do seu índice no Pinecone, se for diferente de 'brito-ai'
+PINECONE_INDEX_NAME=brito-ai
 
 # Configurações do Google Gemini
 GOOGLE_API_KEY=SUA_CHAVE_DO_GEMINI_AQUI
 GEMINI_EMBEDDING_MODEL=models/embedding-001
 GEMINI_CHAT_MODEL=models/gemini-1.5-flash
+```
 
-# Linhas da OpenAI (manter comentadas ou remover)
-# OPENAI_API_KEY=sua_chave_api_openai
-# OPENAI_MODEL=gpt-4o-mini
-Como obter as chaves:Pinecone: Acesse seu painel Pinecone (pinecone.io), vá em "API Keys" para encontrar sua API Key e seu Environment (Host).Google Gemini: Acesse Google AI Studio (aistudio.google.com), clique em "Get API Key" no menu lateral.Criar o Índice no Pinecone:Acesse seu painel Pinecone.Vá para "Indexes" e clique em "Create Index".Configure o índice com as seguintes informações EXATAS:Name: brito-ai (ou o nome que você definiu em PINECONE_INDEX_NAME no .env)Dimension: 768 (essencial para o embedding-001 do Gemini)Metric: CosinePod Type / Environment: Escolha o que se adequa à sua conta (ex: starter para contas gratuitas) e que corresponda ao seu PINECONE_HOST.Instalação de DependênciasCertifique-se de que está na pasta raiz do projeto (Contratus-AI-RAG).Dependências Python:py -3.11 -m pip install -r requirements.txt
-py -3.11 -m pip install google-generativeai # Garante a instalação do Gemini
-Se tiver avisos sobre scripts não estarem no PATH, pode ignorá-los.Dependências Frontend:Navegue para a pasta frontend:cd frontend
-Instale as dependências Node.js:npm install
-Volte para a pasta raiz do projeto:cd ..
-Processar os ContratosEste passo é crucial para que seus PDFs sejam transformados em embeddings e indexados no Pinecone.Coloque seus arquivos PDF de contratos na pasta contratos/ dentro do diretório raiz do projeto.Na pasta raiz do projeto (Contratus-AI-RAG), execute:py -3.11 processar_contrato.py
-O que esperar: Você verá mensagens de progresso para cada PDF e, ao final, a confirmação de Processamento concluído! com o número de contratos e chunks indexados.Rodando o ProjetoVocê precisará de três terminais abertos simultaneamente.Terminal 1: Iniciar a API Principal (Porta 8000)Abra o Terminal 1 e navegue para a pasta raiz do projeto.Execute:py -3.11 -m uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
-Mantenha este terminal aberto.Terminal 2: Iniciar a API de Upload (Porta 8001 - Opcional)Abra o Terminal 2 e navegue para a pasta raiz do projeto.Execute:py -3.11 -m uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
-Mantenha este terminal aberto.Terminal 3: Iniciar o FrontendAbra o Terminal 3 e navegue para a pasta frontend do projeto:cd frontend
-Execute:npm run dev
-Mantenha este terminal aberto. Ele exibirá a URL de acesso ao frontend (provavelmente http://localhost:5173).Uso da AplicaçãoAbra seu navegador e acesse a URL fornecida pelo Terminal 3 (ex: http://localhost:5173).Você verá a interface do Contratus AI.Para usar o RAG:Ative o "Modo Pergunta" (geralmente um switch ou botão na interface).Digite sua pergunta em linguagem natural na barra de busca (ex: "Qual o valor do aluguel do contrato do Bruno Mendes Oliveira?" ou "Quais são os termos de rescisão para o contrato da Ana Carolina Silva?").Clique em "Buscar".O que esperar: O sistema buscará nos seus contratos e o Google Gemini gerará uma resposta detalhada, citando as fontes (trechos dos documentos) de onde a informação foi retirada.Solução de Problemas ComunsModuleNotFoundError: Significa que uma biblioteca Python não está instalada. Certifique-se de que o comando py -3.11 -m pip install -r requirements.txt foi executado com sucesso e não houve erros.PINECONE_API_KEY não encontrada: O arquivo .env não está na pasta raiz do projeto ou as variáveis não foram preenchidas corretamente.Reason: Forbidden / Wrong API key (Pinecone): Sua PINECONE_API_KEY ou PINECONE_HOST no .env estão incorretos ou não correspondem ao seu ambiente/índice no Pinecone.Vector dimension 768 does not match the dimension of the index 1536: Seu índice no Pinecone foi criado com a dimensão errada. Exclua-o e recrie-o com a dimensão 768.models/gemini-pro is not found ou Object GenerateContentResponse can't be used in 'await' expression: Problemas de compatibilidade com a versão do Python ou da biblioteca google-generativeai. A solução aqui é usar Python 3.11.9 e garantir que a biblioteca google-generativeai está atualizada para essa versão.npm não reconhecido: Node.js e npm não estão instalados ou não estão no PATH. Instale o Node.js LTS e reinicie seu terminal. Se usar PowerShell, configure a política de execução (Set-ExecutionPolicy RemoteSigned).
+#### Como obter as chaves:
+- **Pinecone**: Acesse [pinecone.io](https://pinecone.io) → API Keys
+- **Google Gemini**: Acesse [Google AI Studio](https://aistudio.google.com) → Get API Key
+
+#### Criar o Índice no Pinecone
+No painel do Pinecone, crie um índice com as configurações:
+- **Name**: `brito-ai`
+- **Dimension**: `768` 
+- **Metric**: `Cosine`
+- **Pod Type**: Starter (para contas gratuitas)
+
+### 2. Instalação de Dependências
+
+#### Dependências Python
+```bash
+py -3.11 -m pip install -r requirements.txt
+py -3.11 -m pip install google-generativeai
+```
+
+#### Dependências Frontend
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 3. Processar os Contratos
+
+1. Coloque seus arquivos PDF na pasta `contratos/`
+2. Execute o processamento:
+```bash
+py -3.11 processar_contrato.py
+```
+
+### 4. Rodando a Aplicação
+
+Você precisará de **3 terminais** abertos simultaneamente:
+
+#### Terminal 1: API Principal (Porta 8000)
+```bash
+py -3.11 -m uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
+```
+
+#### Terminal 2: API de Upload (Porta 8001) - Opcional
+```bash
+py -3.11 -m uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
+```
+
+#### Terminal 3: Frontend
+```bash
+cd frontend
+npm run dev
+```
+
+### 5. Usando a Aplicação
+
+1. Acesse a URL fornecida pelo Terminal 3 (geralmente `http://localhost:5173`)
+2. Ative o "Modo Pergunta" na interface
+3. Digite sua pergunta em linguagem natural:
+   - *"Qual o valor do aluguel do contrato do Bruno Mendes Oliveira?"*
+   - *"Quais são os termos de rescisão para o contrato da Ana Carolina Silva?"*
+4. Clique em "Buscar"
+
+O sistema buscará nos seus contratos e o Google Gemini gerará uma resposta detalhada com citações das fontes.
+
+## 🔧 Solução de Problemas
+
+### Erros Comuns
+
+| Erro | Solução |
+|------|---------|
+| `ModuleNotFoundError` | Execute `py -3.11 -m pip install -r requirements.txt` |
+| `PINECONE_API_KEY não encontrada` | Verifique se o arquivo `.env` está na pasta raiz |
+| `Reason: Forbidden / Wrong API key` | Confirme suas credenciais do Pinecone no `.env` |
+| `Vector dimension 768 does not match 1536` | Recrie o índice Pinecone com dimensão 768 |
+| `npm não reconhecido` | Instale o Node.js LTS e reinicie o terminal |
+
+## 📝 Licença
+
+Este projeto está sob a licença [MIT](LICENSE).
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+
+---
+
+**Desenvolvido com ❤️ usando RAG + Google Gemini + Pinecone**
