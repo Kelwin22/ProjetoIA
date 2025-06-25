@@ -1,301 +1,207 @@
-# Contratus AI  - Sistema de Consulta de Contratos
+Contratus AI - Sistema de Consulta Semântica de Contratos
+Visão Geral do Projeto
+O Contratus AI é um sistema moderno para processamento e consulta inteligente de contratos imobiliários. Ele utiliza o poder dos Large Language Models (LLMs) e bancos de dados vetoriais para permitir busca semântica e responder a perguntas em linguagem natural diretamente do conteúdo de seus documentos.
 
-Um sistema moderno para processamento e consulta semântica de contratos , utilizando Python, Pinecone e SvelteKit. Permite busca semântica e perguntas em linguagem natural sobre contratos.
+Problema Resolvido: Em um cenário com múltiplos contratos complexos, encontrar informações específicas (como valores de aluguel, prazos de rescisão, nomes de partes) pode ser demorado e propenso a erros. O Contratus AI automatiza e agiliza essa busca, transformando seus contratos em uma base de conhecimento interativa.
 
-## Estrutura do Projeto
+Conceitos Fundamentais
+Este projeto implementa a arquitetura de Geração Aumentada por Recuperação (RAG - Retrieval-Augmented Generation):
 
-```
-├── api_pinecone.py       # API principal com FastAPI
+Geração Aumentada por Recuperação (RAG): É uma técnica que capacita um LLM a acessar e utilizar informações de uma base de conhecimento externa (neste caso, seus contratos PDF) para gerar respostas mais precisas, atualizadas e com citação de fontes, indo além do seu conhecimento de treinamento.
+
+Embeddings: São representações numéricas (vetores) de textos. Textos com significados semelhantes são transformados em vetores "próximos" em um espaço multidimensional. O modelo utilizado para gerar esses embeddings é o Google Gemini (models/embedding-001), com dimensão 768.
+
+Banco de Dados Vetorial (Pinecone): Uma base de dados otimizada para armazenar e realizar buscas de similaridade em alta velocidade entre vetores de embeddings. Ele armazena os embeddings dos seus contratos, permitindo que o sistema encontre rapidamente os trechos mais relevantes para uma consulta. A métrica de similaridade utilizada é a Cosseno.
+
+Large Language Model (LLM): O "cérebro" do sistema que compreende as perguntas e formula as respostas. Após o sistema de busca (RAG) encontrar os trechos relevantes dos contratos, eles são passados para o LLM, que utiliza essas informações para gerar uma resposta contextualizada. O modelo de LLM utilizado é o Google Gemini (models/gemini-1.5-flash).
+
+Tecnologias Utilizadas
+Backend: Python, FastAPI, Uvicorn, Pinecone (cliente Python), google-generativeai (para Gemini), langchain-community (para processamento de PDFs), python-dotenv.
+
+Frontend: SvelteKit, Tailwind CSS, DaisyUI.
+
+Estrutura do Projeto
+├── .env                  # Variáveis de ambiente (chaves API, etc.)
+├── api_pinecone.py       # API principal com FastAPI (busca semântica, LLM)
 ├── api_upload.py         # API para upload de contratos
 ├── llm_router.py         # Roteador para perguntas ao LLM
-├── pinecone_utils.py     # Utilitários para Pinecone
-├── processar_contrato.py # Processamento de contratos
+├── pinecone_utils.py     # Utilitários para interação com o Pinecone e geração de embeddings
+├── processar_contrato.py # Script para processamento de PDFs e indexação no Pinecone
+├── README.md             # Este arquivo
+├── requirements.txt      # Dependências Python
 ├── shared.py             # Funções e modelos compartilhados
-├── contratos/            # Diretório para armazenar os contratos
-├── frontend/             # Aplicação SvelteKit
-├── diagrama_modulos.md   # Diagrama das relações entre módulos
-└── .env                  # Variáveis de ambiente
-```
+├── contratos/            # Diretório para armazenar os contratos PDF
+└── frontend/             # Aplicação SvelteKit (interface do usuário)
 
-Para uma visão detalhada de como os módulos do backend se relacionam, consulte o arquivo [diagrama_modulos.md](diagrama_modulos.md).
+Como Rodar o Projeto
+Siga este passo a passo para configurar e iniciar o Contratus AI em sua máquina.
 
-- **Backend (Python + FastAPI)**
-  - `processar_contrato.py`: Processamento automático de PDFs e geração de embeddings
-  - `api_pinecone.py`: API REST para busca semântica de contratos usando Pinecone
-  - `api_upload.py`: API para upload e processamento automático de novos contratos
-  - `pinecone_utils.py`: Biblioteca de utilidades para interação com o Pinecone
-  - `llm_router.py`: Roteador para processamento de perguntas com LLM
-  - `shared.py`: Funções compartilhadas entre os módulos
+Pré-requisitos
+Certifique-se de ter os seguintes softwares instalados em seu sistema:
 
-- **Frontend (SvelteKit)**
-  - Interface moderna e responsiva com Tailwind CSS e DaisyUI
-  - Busca semântica em linguagem natural
-  - Visualização de contratos
-  - Modo de pergunta para consultas em linguagem natural
+Git: Para clonar o repositório.
 
-## Explicação dos Códigos Backend
+Baixar Git
 
-### 1. `pinecone_utils.py`
+Python 3.11.9: Versão recomendada para compatibilidade com as bibliotecas.
 
-**Função**: Biblioteca de utilidades para interação com o Pinecone (banco de dados vetorial).
+Baixar Python 3.11.9 (Windows installer)
 
-**Principais funcionalidades**:
-- Conexão com o Pinecone
-- Geração de embeddings usando OpenAI (modelo text-embedding-3-small)
-- Indexação de documentos
-- Busca semântica de documentos
-- Listagem de documentos no índice
+IMPORTANTE: Durante a instalação do Python, marque a opção "Add Python 3.11 to PATH".
 
-Este arquivo funciona como uma biblioteca de funções auxiliares e não precisa ser executado diretamente.
+Node.js LTS e npm: Para rodar o frontend.
 
-### 2. `processar_contrato.py`
+Baixar Node.js LTS
 
-**Função**: Processamento de contratos em PDF e indexação no Pinecone.
+IMPORTANTE: Durante a instalação do Node.js, certifique-se de que a opção "Add to PATH" esteja selecionada.
 
-**Principais funcionalidades**:
-- Carrega arquivos PDF usando LangChain
-- Divide documentos em chunks menores
-- Gera embeddings para cada chunk
-- Indexa os chunks no Pinecone com metadados
-- Pode processar um único contrato ou todos os contratos em uma pasta
+Se usar PowerShell, pode ser necessário ajustar a política de execução: Abra o PowerShell como Administrador e execute Set-ExecutionPolicy RemoteSigned (confirme com Y).
 
-Este arquivo pode ser executado diretamente para processar contratos:
-- Para processar todos os contratos: `python processar_contrato.py`
-- Para processar um contrato específico: `python processar_contrato.py caminho/para/contrato.pdf`
+Configuração do Projeto
+Clonar o Repositório:
 
-### 3. `api_pinecone.py`
+Abra seu terminal (PowerShell ou Prompt de Comando) e navegue até a pasta onde deseja salvar o projeto.
 
-**Função**: API REST para busca semântica de contratos usando FastAPI.
+Clone o repositório (substitua <URL_DO_SEU_REPOSITORIO> pela URL do seu repositório no GitHub):
 
-**Principais funcionalidades**:
-- Endpoint para listar todos os contratos
-- Endpoint para busca semântica por consulta em linguagem natural
-- Endpoint para listar arquivos únicos no índice
-- Gerenciamento de conexão com Pinecone
-- Integração com o roteador LLM para perguntas em linguagem natural
+git clone <URL_DO_SEU_REPOSITORIO>
+cd Contratus-AI-RAG # Ou o nome da pasta do seu projeto
 
-Este arquivo inicia um servidor web na porta 8000 quando executado: `python api_pinecone.py`
+Configurar Variáveis de Ambiente (.env):
 
-### 4. `api_upload.py`
+Na pasta raiz do projeto (Contratus-AI-RAG/), crie um arquivo chamado .env.
 
-**Função**: API REST para upload e processamento automático de novos contratos.
+Este arquivo conterá suas chaves de API sensíveis e NUNCA deve ser enviado para o GitHub.
 
-**Principais funcionalidades**:
-- Endpoint para upload de arquivos PDF
-- Processamento assíncrono dos contratos enviados
-- Endpoint para listar contratos disponíveis na pasta
+Copie e cole o seguinte conteúdo no seu arquivo .env, substituindo os placeholders SEU_VALOR_DA_PINECONE_API_KEY_AQUI, SEU_VALOR_DO_PINECONE_HOST_AQUI, e SUA_CHAVE_DO_GEMINI_AQUI pelos seus dados reais.
 
-Este arquivo inicia um servidor web na porta 8001 quando executado: `python api_upload.py`
+# Configurações do Pinecone
+PINECONE_API_KEY=SEU_VALOR_DA_PINECONE_API_KEY_AQUI
+PINECONE_HOST=SEU_VALOR_DO_PINECONE_HOST_AQUI
+PINECONE_INDEX_NAME=brito-ai # Ou o nome do seu índice no Pinecone, se for diferente de 'brito-ai'
 
-### 5. `llm_router.py`
+# Configurações do Google Gemini
+GOOGLE_API_KEY=SUA_CHAVE_DO_GEMINI_AQUI
+GEMINI_EMBEDDING_MODEL=models/embedding-001
+GEMINI_CHAT_MODEL=models/gemini-1.5-flash
 
-**Função**: Roteador para processamento de perguntas usando LLM (Large Language Model).
+# Linhas da OpenAI (manter comentadas ou remover)
+# OPENAI_API_KEY=sua_chave_api_openai
+# OPENAI_MODEL=gpt-4o-mini
 
-**Principais funcionalidades**:
-- Endpoint para responder perguntas sobre contratos usando o LLM
-- Integração com a busca semântica para fornecer contexto ao LLM
-- Formatação de respostas com citação de fontes
+Como obter as chaves:
 
-Este arquivo é importado pelo `api_pinecone.py` e não precisa ser executado diretamente.
+Pinecone: Acesse seu painel Pinecone (pinecone.io), vá em "API Keys" para encontrar sua API Key e seu Environment (Host).
 
-### 6. `shared.py`
+Google Gemini: Acesse Google AI Studio (aistudio.google.com), clique em "Get API Key" no menu lateral.
 
-**Função**: Funções e modelos compartilhados entre os diferentes módulos.
+Criar o Índice no Pinecone:
 
-**Principais funcionalidades**:
-- Função compartilhada para busca de contratos
-- Modelos de dados para respostas da API
+Acesse seu painel Pinecone.
 
-Este arquivo é importado por outros módulos e não precisa ser executado diretamente.
+Vá para "Indexes" e clique em "Create Index".
 
-## Requisitos
+Configure o índice com as seguintes informações EXATAS:
 
-- Python 3.8+
-- Node.js 18+
-- Conta no Pinecone (https://www.pinecone.io/)
-- Chave de API da OpenAI (https://platform.openai.com/)
+Name: brito-ai (ou o nome que você definiu em PINECONE_INDEX_NAME no .env)
 
-## Configuração
+Dimension: 768 (essencial para o embedding-001 do Gemini)
 
-1. **Backend**
+Metric: Cosine
 
-```bash
-# Instalar dependências
-pip install -r requirements.txt
+Pod Type / Environment: Escolha o que se adequa à sua conta (ex: starter para contas gratuitas) e que corresponda ao seu PINECONE_HOST.
 
-# Configurar variáveis de ambiente (.env)
-OPENAI_API_KEY=sua_chave_api_openai
-PINECONE_API_KEY=sua_chave_api_pinecone
-PINECONE_HOST=seu_host_pinecone
-PINECONE_INDEX_NAME=brito-ai
-OPENAI_MODEL=gpt-4o-mini  # Opcional, padrão é gpt-4o-mini
+Instalação de Dependências
+Certifique-se de que está na pasta raiz do projeto (Contratus-AI-RAG).
 
-# Processar contratos existentes
-python processar_contrato.py
+Dependências Python:
 
-# Processar apenas um contrato específico
-python processar_contrato.py contratos\EDUARD ROCHA FONTENELE.pdf
+py -3.11 -m pip install -r requirements.txt
+py -3.11 -m pip install google-generativeai # Garante a instalação do Gemini
 
-# Iniciar a API de busca semântica com Uvicorn
-uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
+Se tiver avisos sobre scripts não estarem no PATH, pode ignorá-los.
 
-# Iniciar a API de upload (em outra janela do terminal)
-uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
-```
+Dependências Frontend:
 
-**Nota importante:** O índice vetorial no Pinecone (`brito-ai`) deve ser criado manualmente através do painel de controle do Pinecone, usando o modelo `text-embedding-3-small` da OpenAI com dimensão 1536.
+Navegue para a pasta frontend:
 
-2. **Frontend**
-
-```bash
-# Entrar no diretório do frontend
 cd frontend
 
-# Instalar dependências
+Instale as dependências Node.js:
+
 npm install
 
-# Iniciar em modo desenvolvimento
+Volte para a pasta raiz do projeto:
+
+cd ..
+
+Processar os Contratos
+Este passo é crucial para que seus PDFs sejam transformados em embeddings e indexados no Pinecone.
+
+Coloque seus arquivos PDF de contratos na pasta contratos/ dentro do diretório raiz do projeto.
+
+Na pasta raiz do projeto (Contratus-AI-RAG), execute:
+
+py -3.11 processar_contrato.py
+
+O que esperar: Você verá mensagens de progresso para cada PDF e, ao final, a confirmação de Processamento concluído! com o número de contratos e chunks indexados.
+
+Rodando o Projeto
+Você precisará de três terminais abertos simultaneamente.
+
+Terminal 1: Iniciar a API Principal (Porta 8000)
+Abra o Terminal 1 e navegue para a pasta raiz do projeto.
+
+Execute:
+
+py -3.11 -m uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
+
+Mantenha este terminal aberto.
+
+Terminal 2: Iniciar a API de Upload (Porta 8001 - Opcional)
+Abra o Terminal 2 e navegue para a pasta raiz do projeto.
+
+Execute:
+
+py -3.11 -m uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
+
+Mantenha este terminal aberto.
+
+Terminal 3: Iniciar o Frontend
+Abra o Terminal 3 e navegue para a pasta frontend do projeto:
+
+cd frontend
+
+Execute:
+
 npm run dev
-```
 
-## Ordem de Execução Recomendada
+Mantenha este terminal aberto. Ele exibirá a URL de acesso ao frontend (provavelmente http://localhost:5173).
 
-1. **Processamento inicial de contratos** (se necessário):
-   ```
-   python processar_contrato.py
-   ```
-   Este passo é opcional se os contratos já foram processados e indexados no Pinecone.
+Uso da Aplicação
+Abra seu navegador e acesse a URL fornecida pelo Terminal 3 (ex: http://localhost:5173).
 
-2. **Iniciar a API de busca semântica**:
-   ```
-   uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
-   ```
-   Esta API é essencial para o funcionamento do frontend, pois fornece a capacidade de busca semântica e o modo de pergunta com LLM.
+Você verá a interface do Contratus AI.
 
-3. **Iniciar a API de upload** (opcional, se quiser permitir upload de novos contratos):
-   ```
-   uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
-   ```
-   Este passo é opcional se não houver necessidade de fazer upload de novos contratos.
+Para usar o RAG:
 
-4. **Iniciar o frontend**:
-   ```
-   cd frontend
-   npm install (se ainda não tiver instalado as dependências)
-   npm run dev
-   ```
-   Isso iniciará o servidor de desenvolvimento do SvelteKit na porta 5173.
+Ative o "Modo Pergunta" (geralmente um switch ou botão na interface).
 
-Após esses passos, você poderá acessar a aplicação em `http://localhost:5173` e realizar consultas semânticas aos contratos já indexados no Pinecone.
+Digite sua pergunta em linguagem natural na barra de busca (ex: "Qual o valor do aluguel do contrato do Bruno Mendes Oliveira?" ou "Quais são os termos de rescisão para o contrato da Ana Carolina Silva?").
 
-## Uso
+Clique em "Buscar".
 
-### Processamento de Contratos
+O que esperar: O sistema buscará nos seus contratos e o Google Gemini gerará uma resposta detalhada, citando as fontes (trechos dos documentos) de onde a informação foi retirada.
 
-1. Coloque os arquivos PDF dos contratos na pasta `contratos/`
-2. Execute `python processar_contrato.py` para processar todos os contratos da pasta
-3. Alternativamente, processe um contrato específico: `python processar_contrato.py caminho/para/contrato.pdf`
+Solução de Problemas Comuns
+ModuleNotFoundError: Significa que uma biblioteca Python não está instalada. Certifique-se de que o comando py -3.11 -m pip install -r requirements.txt foi executado com sucesso e não houve erros.
 
-### Upload de Novos Contratos
+PINECONE_API_KEY não encontrada: O arquivo .env não está na pasta raiz do projeto ou as variáveis não foram preenchidas corretamente.
 
-1. Inicie a API de upload: `uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload`
-2. Envie novos contratos via endpoint POST `/upload/contrato`
-3. Os contratos enviados serão processados automaticamente em segundo plano
+Reason: Forbidden / Wrong API key (Pinecone): Sua PINECONE_API_KEY ou PINECONE_HOST no .env estão incorretos ou não correspondem ao seu ambiente/índice no Pinecone.
 
-### Consulta de Contratos
+Vector dimension 768 does not match the dimension of the index 1536: Seu índice no Pinecone foi criado com a dimensão errada. Exclua-o e recrie-o com a dimensão 768.
 
-1. Acesse o frontend em `http://localhost:5173`
-2. Use a barra de busca para consultar contratos em linguagem natural
-3. Visualize os resultados ordenados por relevância
-4. Alternativamente, use a API diretamente via endpoint GET `/contratos/busca?q=sua consulta`
+models/gemini-pro is not found ou Object GenerateContentResponse can't be used in 'await' expression: Problemas de compatibilidade com a versão do Python ou da biblioteca google-generativeai. A solução aqui é usar Python 3.11.9 e garantir que a biblioteca google-generativeai está atualizada para essa versão.
 
-### Modo Pergunta (LLM)
-
-1. Acesse o frontend em `http://localhost:5173`
-2. Ative o switch "Modo Pergunta" ao lado da barra de busca
-3. Digite sua pergunta em linguagem natural (ex: "Qual o valor do aluguel que Eduardo paga?" ou "Temos informações de boleto?")
-4. Clique em "Buscar" para obter uma resposta detalhada baseada nos contratos relevantes
-
-Alternativamente, use a API diretamente via endpoint POST `/llm/ask` com um JSON no formato:
-```json
-{
-  "question": "Sua pergunta aqui",
-  "max_results": 3
-}
-```
-
-O sistema utiliza o modelo configurado na variável de ambiente `OPENAI_MODEL` (padrão: gpt-4o-mini) para gerar respostas detalhadas com base nos contratos encontrados na busca semântica.
-
-## Tecnologias
-
-- **Backend**:
-  - Python
-  - FastAPI
-  - Uvicorn (servidor ASGI)
-  - Pinecone (banco de dados vetorial)
-  - OpenAI Embeddings (modelo text-embedding-3-small)
-  - OpenAI Chat Completions (modelo gpt-4o-mini padrão)
-  - LangChain (processamento de documentos)
-  
-- **Frontend**:
-  - SvelteKit
-  - Tailwind CSS
-  - DaisyUI
-
-## Documentação das APIs
-
-### API de Busca Semântica (api_pinecone.py)
-
-**Porta**: 8000
-
-| Endpoint | Método | Descrição | Parâmetros |
-|----------|--------|-----------|------------|
-| `/` | GET | Verifica o status da API e a conexão com o Pinecone | - |
-| `/contratos/lista` | GET | Lista todos os contratos disponíveis | `skip`: número de registros para pular<br>`limit`: número máximo de registros para retornar |
-| `/contratos/busca` | GET | Realiza uma busca semântica nos contratos | `q`: consulta para busca<br>`limit`: número máximo de resultados |
-| `/contratos/arquivos` | GET | Lista todos os nomes de arquivos únicos no índice | - |
-| `/llm/ask` | POST | Responde a perguntas sobre contratos usando o LLM | Body JSON: `{"question": "string", "max_results": int}` |
-
-### API de Upload (api_upload.py)
-
-**Porta**: 8001
-
-| Endpoint | Método | Descrição | Parâmetros |
-|----------|--------|-----------|------------|
-| `/upload/contrato` | POST | Faz upload de um novo contrato PDF e o processa automaticamente | Form Data: `file`: arquivo PDF |
-| `/contratos/lista` | GET | Lista todos os contratos disponíveis na pasta de contratos | - |
-
-## Inicialização com Uvicorn
-
-O Uvicorn é um servidor ASGI (Asynchronous Server Gateway Interface) de alto desempenho que é recomendado para aplicações FastAPI. Para iniciar as APIs com Uvicorn, siga os comandos abaixo:
-
-### API de Busca Semântica
-
-```bash
-uvicorn api_pinecone:app --host 127.0.0.1 --port 8000 --reload
-```
-
-Opções importantes:
-- `--host 127.0.0.1`: Limita o acesso apenas ao localhost
-- `--port 8000`: Define a porta 8000 para a API
-- `--reload`: Ativa o modo de recarga automática (útil para desenvolvimento)
-
-### API de Upload
-
-```bash
-uvicorn api_upload:app --host 127.0.0.1 --port 8001 --reload
-```
-
-Para produção, remova a flag `--reload` e considere usar `--host 0.0.0.0` se precisar acessar a API de outros dispositivos na rede.
-
-## Atualizações Recentes
-
-- **Correção do modo pergunta (LLM)**: Resolvido o problema que afetava o modo pergunta após o processamento de novos contratos. A solução envolveu modificar o `llm_router.py` para acessar diretamente a função `buscar_documentos` do módulo `pinecone_utils.py`, contornando a incompatibilidade de formato com a função `buscar_contratos`.
-
-- **Melhoria no tratamento de erros**: Implementado tratamento de erros mais robusto em toda a aplicação, com mensagens mais claras e logs detalhados para facilitar a depuração.
-
-- **Otimização do frontend**: Melhorado o tratamento de erros no frontend para exibir mensagens mais claras ao usuário.
-
-- **Processamento de novos contratos**: Adicionados e processados novos contratos (contrato_joao_silva.pdf e contrato_maria_oliveira.pdf).
-
-- **Atualização da documentação**: Melhorada a documentação com instruções detalhadas para inicialização e uso do sistema.
+npm não reconhecido: Node.js e npm não estão instalados ou não estão no PATH. Instale o Node.js LTS e reinicie seu terminal. Se usar PowerShell, configure a política de execução (Set-ExecutionPolicy RemoteSigned).
